@@ -13,22 +13,20 @@ with st.sidebar:
 
 st.title("📊 台指期即時監控面板")
 
-# --- 1. 上方：即時成交明細區塊 ---
-st.subheader("⚡ 即時成交明細 (大單警示)")
+# --- 1. 上方：即時成交明細與大單警示區塊 ---
+st.subheader("⚡ 即時成交明細")
 
-# 使用固定高度的容器來模擬成交明細滾動視窗
-detail_container = st.container(height=220)
+# 使用容器包覆成交明細，營造即時滾動視窗感
+detail_container = st.container(height=240)
 with detail_container:
-  # 模擬成交明細資料：時間、價格、張數、內外盤屬性
-  # 註：台指期紅漲綠跌 / 紅色外盤(買)、綠色內盤(賣)
   st.markdown(
       """
-        <div style="font-family: monospace; font-size: 14px; line-height: 1.6;">
-            <span style="color: #999;">10:29:40</span> | <span style="color: #ff4b4b; font-weight: bold;">23449</span> | <span style="color: #ff4b4b;">1 張 (外盤)</span> <span style="background-color: #ff4b4b22; color: #ff4b4b; padding: 2px 6px; border-radius: 4px; font-size: 11px;">🔥 大單 35 張</span><br>
-            <span style="color: #999;">10:29:34</span> | <span style="color: #00cc66;">23448</span> | <span style="color: #00cc66;">1 張 (內盤)</span><br>
-            <span style="color: #999;">10:29:26</span> | <span style="color: #00cc66;">23448</span> | <span style="color: #00cc66;">1 張 (內盤)</span><br>
-            <span style="color: #999;">10:29:18</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">2 張 (外盤)</span><br>
-            <span style="color: #999;">10:28:39</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">1 張 (外盤)</span>
+        <div style="font-family: monospace; font-size: 14px; line-height: 1.8;">
+            <span style="color: #999;">10:32:15</span> | <span style="color: #ff4b4b; font-weight: bold;">23450</span> | <span style="color: #ff4b4b;">2 張 (外盤)</span> <span style="background-color: #ff4b4b22; color: #ff4b4b; padding: 2px 6px; border-radius: 4px; font-size: 11px;">🔥 大單 35 張</span><br>
+            <span style="color: #999;">10:32:08</span> | <span style="color: #00cc66;">23448</span> | <span style="color: #00cc66;">1 張 (內盤)</span><br>
+            <span style="color: #999;">10:31:55</span> | <span style="color: #00cc66;">23448</span> | <span style="color: #00cc66;">3 張 (內盤)</span><br>
+            <span style="color: #999;">10:31:40</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">1 張 (外盤)</span><br>
+            <span style="color: #999;">10:31:12</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">2 張 (外盤)</span>
         </div>
     """,
       unsafe_allow_html=True,
@@ -36,22 +34,21 @@ with detail_container:
 
 st.markdown("---")
 
-# --- 2. 中間：委買委賣五檔區塊 ---
+# --- 2. 下方：委買委賣五檔與總量統計區塊 ---
 st.subheader("📊 委買委賣五檔")
 
-# 上方顯示總委買 / 總委賣量統計列
+# 總量統計列
 col_stat1, col_stat2 = st.columns(2)
 with col_stat1:
   st.metric(label="總委買張數", value="2,772", delta="+120")
 with col_stat2:
   st.metric(label="總委賣張數", value="331", delta="-45")
 
-# 左右並排顯示五檔掛單（左側賣價五檔，右側買價五檔，或對應三竹風看盤習慣）
+# 左右並排顯示五檔掛單（左側賣價五檔，右側買價五檔）
 col_bid, col_ask = st.columns(2)
 
 with col_bid:
   st.markdown("#### 🔴 賣價五檔 (委賣)")
-  # 賣價通常由上到下價格遞減或遞增，依看盤習慣調整
   st.dataframe(
       {
           "賣價": [23454, 23453, 23452, 23451, 23450],

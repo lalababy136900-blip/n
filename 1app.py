@@ -1,23 +1,48 @@
 import streamlit as st
+from unitrade.unitrade import Unitrade  # 假設使用 unitrade 取得行情
 
 # 設定頁面寬度與配置
 st.set_page_config(
-    page_title="台指期即時盯盤系統", page_icon="📈", layout="wide"
+    page_title="台指期即時報價系統", page_icon="📈", layout="wide"
 )
 
-# --- 側邊欄：設定區 ---
+# --- 1. 初始化行情連線 (純報價不需憑證登入) ---
+
+
+@st.cache_resource
+def init_market_data():
+  try:
+    # 初始化 Unitrade 行情物件 (僅連線行情源)
+    api = Unitrade()
+    # api.connect_quote() # 視官方 API 語法連接行情
+    return api
+  except Exception as e:
+    st.error(f"行情連線初始化失敗: {e}")
+    return None
+
+
+api = init_market_data()
+
+# --- 2. 側邊欄：參數設定 ---
 with st.sidebar:
   st.header("⚙️ 參數設定")
   threshold = st.slider("大單門檻 (張)", min_value=1, max_value=100, value=30)
+
+  if api:
+    st.success("🟢 行情連線正常")
+  else:
+    st.warning("⚠️ 尚未連線行情")
+
   st.info(f"💡 目前設定：單筆成交量 $\\ge$ {threshold} 張觸發警報")
 
-st.title("📊 台指期即時監控面板")
+st.title("📊 台指期即時報價與五檔監控")
 
-# --- 1. 上方：即時成交明細與大單警示區塊 ---
+# --- 3. 上方：即時成交明細與大單警示區塊 ---
 st.subheader("⚡ 即時成交明細")
 
 detail_container = st.container(height=220)
 with detail_container:
+  # 這裡未來會接收即時成交回呼 (Callback) 更新資料
   st.markdown(
       """
         <div style="font-family: monospace; font-size: 14px; line-height: 1.8;">
@@ -32,10 +57,9 @@ with detail_container:
 
 st.markdown("---")
 
-# --- 2. 五檔報價與下方總掛單區塊 ---
+# --- 4. 五檔報價與下方總掛單區塊（左邊賣價、右邊買價） ---
 st.subheader("📊 委買委賣五檔")
 
-# 左右並排：左邊賣價五檔，右邊買價五檔
 col_ask_box, col_bid_box = st.columns(2)
 
 with col_ask_box:
@@ -70,7 +94,7 @@ with col_bid_box:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 下方顯示總委買 / 總委賣總掛單數據
+# 下方總掛單統計
 st.markdown("##### 📌 總掛單統計")
 col_stat1, col_stat2 = st.columns(2)
 with col_stat1:

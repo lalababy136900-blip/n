@@ -16,8 +16,7 @@ st.title("📊 台指期即時監控面板")
 # --- 1. 上方：即時成交明細與大單警示區塊 ---
 st.subheader("⚡ 即時成交明細")
 
-# 使用容器包覆成交明細，營造即時滾動視窗感
-detail_container = st.container(height=240)
+detail_container = st.container(height=220)
 with detail_container:
   st.markdown(
       """
@@ -25,8 +24,7 @@ with detail_container:
             <span style="color: #999;">10:32:15</span> | <span style="color: #ff4b4b; font-weight: bold;">23450</span> | <span style="color: #ff4b4b;">2 張 (外盤)</span> <span style="background-color: #ff4b4b22; color: #ff4b4b; padding: 2px 6px; border-radius: 4px; font-size: 11px;">🔥 大單 35 張</span><br>
             <span style="color: #999;">10:32:08</span> | <span style="color: #00cc66;">23448</span> | <span style="color: #00cc66;">1 張 (內盤)</span><br>
             <span style="color: #999;">10:31:55</span> | <span style="color: #00cc66;">23448</span> | <span style="color: #00cc66;">3 張 (內盤)</span><br>
-            <span style="color: #999;">10:31:40</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">1 張 (外盤)</span><br>
-            <span style="color: #999;">10:31:12</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">2 張 (外盤)</span>
+            <span style="color: #999;">10:31:40</span> | <span style="color: #ff4b4b;">23449</span> | <span style="color: #ff4b4b;">1 張 (外盤)</span>
         </div>
     """,
       unsafe_allow_html=True,
@@ -34,7 +32,7 @@ with detail_container:
 
 st.markdown("---")
 
-# --- 2. 下方：委買委賣五檔與總量統計區塊 ---
+# --- 2. 下方：五檔報價與總量統計（採用傳統看盤條列設計） ---
 st.subheader("📊 委買委賣五檔")
 
 # 總量統計列
@@ -44,27 +42,35 @@ with col_stat1:
 with col_stat2:
   st.metric(label="總委賣張數", value="331", delta="-45")
 
-# 左右並排顯示五檔掛單（左側賣價五檔，右側買價五檔）
-col_bid, col_ask = st.columns(2)
+# 使用 HTML 打造無格子的精簡五檔條列（仿三竹風）
+col_bid_box, col_ask_box = st.columns(2)
 
-with col_bid:
-  st.markdown("#### 🔴 賣價五檔 (委賣)")
-  st.dataframe(
-      {
-          "賣價": [23454, 23453, 23452, 23451, 23450],
-          "張數": [27, 42, 27, 17, 18],
-      },
-      use_container_width=True,
-      hide_index=True,
+with col_bid_box:
+  st.markdown(
+      """
+    <div style="background-color: #1e1e1e; padding: 10px; border-radius: 6px; font-family: monospace;">
+        <div style="color: #ff4b4b; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 4px;">🔴 賣價五檔 (委賣)</div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23454</span> <span>27張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23453</span> <span>42張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23452</span> <span>27張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23451</span> <span>17張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23450</span> <span>18張</span></div>
+    </div>
+    """,
+      unsafe_allow_html=True,
   )
 
-with col_ask:
-  st.markdown("#### 🟢 買價五檔 (委買)")
-  st.dataframe(
-      {
-          "買價": [23448, 23447, 23446, 23445, 23444],
-          "張數": [5, 53, 26, 26, 7],
-      },
-      use_container_width=True,
-      hide_index=True,
+with col_ask_box:
+  st.markdown(
+      """
+    <div style="background-color: #1e1e1e; padding: 10px; border-radius: 6px; font-family: monospace;">
+        <div style="color: #00cc66; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 4px;">🟢 買價五檔 (委買)</div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23448</span> <span>5張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23447</span> <span>53張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23446</span> <span>26張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23445</span> <span>26張</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23444</span> <span>7張</span></div>
+    </div>
+    """,
+      unsafe_allow_html=True,
   )

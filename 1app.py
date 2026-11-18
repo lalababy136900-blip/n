@@ -9,7 +9,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# 強制套用深色看盤風格與緊湊排版 CSS
+# 強制套用深色看盤風格與緊湊排版 CSS（修復五檔對齊與寬度）
 st.markdown(
     """
     <style>
@@ -69,7 +69,7 @@ st.markdown(
         font-weight: bold;
     }
 
-    /* 經典三竹風黑底五檔表格（緊湊、完全對稱） */
+    /* 經典三竹風黑底五檔表格（強制對稱、固定欄寬） */
     .orderbook-table {
         width: 100%;
         border-collapse: collapse;
@@ -77,6 +77,7 @@ st.markdown(
         font-family: monospace;
         font-size: 14px;
         border: 1px solid #2a2a2a;
+        table-layout: fixed;
     }
     .orderbook-table th {
         background-color: #1f1f1f;
@@ -84,11 +85,12 @@ st.markdown(
         padding: 6px;
         border-bottom: 1px solid #333;
         text-align: center;
+        width: 25%;
     }
     .orderbook-table td {
-        padding: 6px 10px;
+        padding: 6px 8px;
         border-bottom: 1px solid #222;
-        text-align: right;
+        text-align: center;
     }
     .sell-text { color: #00cc66; font-weight: bold; }
     .buy-text { color: #ff4d4d; font-weight: bold; }
@@ -158,95 +160,4 @@ for _ in range(300):
     seconds_left = max(0, int(60 - elapsed))
 
     with placeholder.container():
-        # 1. 頂部即時報價列
-        st.markdown(
-            f"""
-            <div class="top-bar">
-                <div>
-                    <div style="font-size:13px; color:#aaa;">台指期近全 (TX)</div>
-                    <div class="price-main">{curr_price}</div>
-                </div>
-                <div style="text-align:right;">
-                    <div class="price-sub">▲ +{price_diff} (+0.60%)</div>
-                    <div style="font-size:12px; color:#888; margin-top:4px;">總量 648,695</div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        # 2. 核心數據三小卡（1分盤差、1分成交量、歸零倒數）
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.markdown(
-                f'<div class="stat-box"><div class="stat-label">🔥 1分累積盤差</div><div class="stat-val" style="color:{spread_color};">{acc_spread:+d}</div></div>',
-                unsafe_allow_html=True,
-            )
-        with c2:
-            st.markdown(
-                f'<div class="stat-box"><div class="stat-label">1分累積量</div><div class="stat-val">{st.session_state.minute_volume:,}</div></div>',
-                unsafe_allow_html=True,
-            )
-        with c3:
-            st.markdown(
-                f'<div class="stat-box"><div class="stat-label">分K重置倒數</div><div class="stat-val">{seconds_left} 秒</div></div>',
-                unsafe_allow_html=True,
-            )
-
-        # 3. 逐筆成交明細
-        st.markdown("##### 📋 即時成交明細")
-        trades_html = '<div class="trade-container">'
-        for t in st.session_state.trade_log:
-            c_hex = "#ff4d4d" if t["is_red"] else "#00cc66"
-            row_cls = ""
-            bolt = ""
-            if t["is_big"]:
-                row_cls = "big-red-row" if t["is_red"] else "big-green-row"
-                bolt = " ⚡"
-            trades_html += f"""
-            <div class="trade-row {row_cls}">
-                <span style="color:#888;">{t["時間"]}</span>
-                <span style="color:{c_hex}; font-weight:bold;">{t["價格"]}</span>
-                <span style="color:{c_hex}; font-weight:bold;">{t["張數"]}{bolt}</span>
-            </div>
-            """
-        trades_html += "</div>"
-        st.markdown(trades_html, unsafe_allow_html=True)
-
-        # 4. 經典三竹風黑底委買委賣五檔（四欄緊密合併對稱）
-        st.markdown("##### 📊 委買委賣五檔")
-        p = curr_price
-        rows_html = ""
-        for i in range(5):
-            sell_p = p + (5 - i)
-            sell_v = random.randint(2, 35)
-            buy_p = p - i
-            buy_v = random.randint(2, 35)
-            rows_html += f"""
-            <tr>
-                <td class="vol-text">{buy_v}</td>
-                <td class="buy-text">{buy_p}</td>
-                <td class="sell-text" style="border-left: 1px solid #333;">{sell_p}</td>
-                <td class="vol-text">{sell_v}</td>
-            </tr>
-            """
-
-        orderbook_html = f"""
-        <table class="orderbook-table">
-            <thead>
-                <tr>
-                    <th>買量</th>
-                    <th>買進</th>
-                    <th style="border-left: 1px solid #333;">賣出</th>
-                    <th>賣量</th>
-                </tr>
-            </thead>
-            <tbody>
-                {rows_html}
-            </tbody>
-        </table>
-        """
-        st.markdown(orderbook_html, unsafe_allow_html=True)
-
-    time.sleep(1)
-    st.rerun()
+        # 1.

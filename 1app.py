@@ -9,7 +9,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# 強制套用深色看盤風格與緊湊排版 CSS（修復五檔對齊與寬度）
+# 強制套用深色看盤風格與緊湊排版 CSS
 st.markdown(
     """
     <style>
@@ -69,7 +69,7 @@ st.markdown(
         font-weight: bold;
     }
 
-    /* 經典三竹風黑底五檔表格（強制對稱、固定欄寬） */
+    /* 經典三竹風黑底五檔表格（四欄均分、置中對稱） */
     .orderbook-table {
         width: 100%;
         border-collapse: collapse;
@@ -139,25 +139,4 @@ for _ in range(300):
     time_str = time.strftime("%H:%M:%S", time.localtime(current_time))
 
     if is_big:
-        side_label = "外盤買進" if is_red else "內盤賣出"
-        st.toast(f"⚡ 大單 {tick_vol} 張 ({side_label}) @ {curr_price}", icon="🚨")
-
-    st.session_state.trade_log.insert(
-        0,
-        {
-            "時間": time_str,
-            "價格": curr_price,
-            "張數": tick_vol,
-            "is_red": is_red,
-            "is_big": is_big,
-        },
-    )
-    if len(st.session_state.trade_log) > 8:
-        st.session_state.trade_log.pop()
-
-    acc_spread = st.session_state.accumulated_spread
-    spread_color = "#ff4d4d" if acc_spread >= 0 else "#00cc66"
-    seconds_left = max(0, int(60 - elapsed))
-
-    with placeholder.container():
-        # 1.
+        side_label = "外盤買進"

@@ -69,7 +69,7 @@ st.markdown(
         font-weight: bold;
     }
 
-    /* 經典三竹風黑底五檔表格 */
+    /* 經典三竹風黑底五檔表格（緊湊、完全對稱） */
     .orderbook-table {
         width: 100%;
         border-collapse: collapse;
@@ -103,7 +103,7 @@ st.sidebar.header("⚙️ 盯盤設定")
 threshold = st.sidebar.slider("大單門檻 (張數)", min_value=10, max_value=100, value=30, step=5)
 st.sidebar.info(f"💡 單筆張數 ≥ **{threshold} 張** 自動高亮並跳出提示")
 
-# 初始化狀態
+# 初始化 1 分鐘重置狀態
 if "start_time" not in st.session_state:
     st.session_state.start_time = time.time()
     st.session_state.accumulated_spread = 0
@@ -116,13 +116,13 @@ for _ in range(300):
     current_time = time.time()
     elapsed = current_time - st.session_state.start_time
 
-    # 每 60 秒歸零 1 分鐘累積盤差
+    # 每 60 秒歸零 1 分鐘累積盤差與成交量
     if elapsed >= 60:
         st.session_state.start_time = current_time
         st.session_state.accumulated_spread = 0
         st.session_state.minute_volume = 0
 
-    # 模擬即時跳動（之後串接統一期貨 API 時替換此區塊）
+    # 模擬即時跳動
     is_red = random.choice([True, False])  # True=外盤買(紅), False=內盤賣(綠)
     tick_vol = random.randint(1, 45)
     base_price = 21910
@@ -193,7 +193,7 @@ for _ in range(300):
                 unsafe_allow_html=True,
             )
 
-        # 3. 逐筆成交明細（黑底緊湊列表＋大單紅綠高亮）
+        # 3. 逐筆成交明細
         st.markdown("##### 📋 即時成交明細")
         trades_html = '<div class="trade-container">'
         for t in st.session_state.trade_log:
@@ -213,12 +213,11 @@ for _ in range(300):
         trades_html += "</div>"
         st.markdown(trades_html, unsafe_allow_html=True)
 
-        # 4. 經典三竹風黑底委買委賣五檔（左右對稱緊密合併）
+        # 4. 經典三竹風黑底委買委賣五檔（四欄緊密合併對稱）
         st.markdown("##### 📊 委買委賣五檔")
         p = curr_price
         rows_html = ""
         for i in range(5):
-            # 賣價由高到低 (p+5 到 p+1)，買價由高到低 (p 到 p-4)
             sell_p = p + (5 - i)
             sell_v = random.randint(2, 35)
             buy_p = p - i
@@ -238,16 +237,4 @@ for _ in range(300):
                 <tr>
                     <th>買量</th>
                     <th>買進</th>
-                    <th style="border-left: 1px solid #333;">賣出</th>
-                    <th>賣量</th>
-                </tr>
-            </thead>
-            <tbody>
-                {rows_html}
-            </tbody>
-        </table>
-        """
-        st.markdown(orderbook_html, unsafe_allow_html=True)
-
-    time.sleep(1)
-    st.rerun()
+                    <th style="border-

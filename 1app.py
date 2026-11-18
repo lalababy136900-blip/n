@@ -237,4 +237,16 @@ for _ in range(300):
                 <tr>
                     <th>買量</th>
                     <th>買進</th>
-                    <th style="border-
+                    <th style="border-left: 1px solid #333;">賣出</th>
+                    <th>賣量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+        """
+        st.markdown(orderbook_html, unsafe_allow_html=True)
+
+    time.sleep(1)
+    st.rerun()

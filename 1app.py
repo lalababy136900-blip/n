@@ -1,42 +1,83 @@
+import time
 import streamlit as st
 
-# 網頁版面設定
+# 設定頁面寬度與配置
 st.set_page_config(
     page_title="台指期即時報價盯盤系統", page_icon="📈", layout="wide"
 )
 
-# --- 1. 嘗試載入 Unitrade 行情模組 ---
-@st.cache_resource
-def init_quote_client():
-  try:
-    import unitrade
-    from unitrade.unitrade import Unitrade
-    
-    # 僅初始化行情連線，完全不呼叫 api.login() 進行憑證登入
-    api = Unitrade()
-    return api, "🟢 Unitrade 模組載入成功"
-  except ImportError:
-    return None, "⚠️ 找不到 unitrade 套件，請確認是否有安裝。"
-  except Exception as e:
-    return None, f"⚠️ 初始化異常: {e}"
-
-api, status_msg = init_quote_client()
-
-# --- 2. 側邊欄：參數與狀態 ---
+# --- 1. 側邊欄：Unitrade API 連線設定與參數 ---
 with st.sidebar:
+  st.header("🔌 Unitrade API 連線")
+
+  # 選擇環境 (測試環境 URL_TEST 或 正式環境 URL_PROD)
+  env_choice = st.selectbox("連線環境", ["測試環境", "正式環境"])
+  user_id = st.text_input("統一期貨帳號", placeholder=" 8004008399")
+  password = st.text_input("登入密碼", type="a790914")
+  ca_file = st.text_input(
+      "憑證檔名 (需放在同資料夾)", placeholder="例如: my_cert.pfx"
+  )
+  ca_pwd = st.text_input("憑證密碼", type="password")
+  symbol = st.text_input("訂閱商品代碼", value="TXFL6")
+
+  connect_btn = st.button("🚀 啟動行情連線", use_container_width=True)
+
+  st.markdown("---")
   st.header("⚙️ 參數設定")
   threshold = st.slider("大單門檻 (張)", min_value=1, max_value=100, value=30)
-  
-  if api:
-    st.success(status_msg)
-  else:
-    st.error(status_msg)
-
   st.info(f"💡 目前設定：單筆成交量 $\\ge$ {threshold} 張觸發警報")
 
+# --- 2. 處理 Unitrade 連線與行情訂閱 ---
+if "api_status" not in st.session_state:
+  st.session_state.api_status = "⚠️ 尚未連線（請於左側輸入資訊啟動）"
+  st.session_state.api_connected = False
+
+if connect_btn:
+  try:
+    import unitrade
+    from unitrade.unitrade import Unitrade, URL_TEST, URL_PROD
+    from unitrade.quote.ddata import DTickDataTrade
+
+    api = Unitrade()
+    target_url = URL_TEST if env_choice == "測試環境" else URL_PROD
+
+    # 執行登入連線
+    api.login(
+        url=target_url,
+        user=user_id,
+        password=password,
+        ca_filename=ca_file,
+        ca_password=ca_pwd,
+    )
+
+    # 定義即時成交回呼
+    def on_tick_data_trade(tick: DTickDataTrade):
+      # 收到即時成交資料時可更新至此
+      print(tick)
+
+    api.dquote.on_tick_data_trade = on_tick_data_trade
+    api.dquote.subscribe_trade_bid_offer(symbol)
+
+    st.session_state.api_status = f"🟢 已連線並訂閱 {symbol}"
+    st.session_state.api_connected = True
+  except ImportError:
+    st.session_state.api_status = (
+        "❌ 雲端尚未安裝 unitrade，請確認 requirements.txt"
+    )
+  except Exception as e:
+    st.session_state.api_status = f"❌ 連線失敗: {e}"
+
+# 顯示目前 API 狀態
+with st.sidebar:
+  if st.session_state.api_connected:
+    st.success(st.session_state.api_status)
+  else:
+    st.warning(st.session_state.api_status)
+
+# --- 3. 主畫面排版（上方明細、中間五檔左賣右買、下方總掛單） ---
 st.title("📊 台指期即時報價與五檔監控")
 
-# --- 3. 上方：即時成交明細 ---
+# 上方：即時成交明細
 st.subheader("⚡ 即時成交明細")
 detail_container = st.container(height=220)
 with detail_container:
@@ -54,7 +95,7 @@ with detail_container:
 
 st.markdown("---")
 
-# --- 4. 五檔報價（左賣右買） ---
+# 中間：委買委賣五檔（左賣右買）
 st.subheader("📊 委買委賣五檔")
 col_ask_box, col_bid_box = st.columns(2)
 
@@ -90,7 +131,7 @@ with col_bid_box:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 下方總掛單統計
+# 下方：總掛單統計
 st.markdown("##### 📌 總掛單統計")
 col_stat1, col_stat2 = st.columns(2)
 with col_stat1:

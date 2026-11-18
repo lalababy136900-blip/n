@@ -12,12 +12,12 @@ with st.sidebar:
 
   # 選擇環境 (測試環境 URL_TEST 或 正式環境 URL_PROD)
   env_choice = st.selectbox("連線環境", ["測試環境", "正式環境"])
-  user_id = st.text_input("統一期貨帳號", placeholder=" 8004008399")
-  password = st.text_input("登入密碼", type="a790914")
+  user_id = st.text_input("統一期貨帳號", placeholder="請輸入身分證字號/帳號")
+  password = st.text_input("登入密碼", type="password")
   ca_file = st.text_input(
       "憑證檔名 (需放在同資料夾)", placeholder="例如: my_cert.pfx"
   )
-  ca_pwd = st.text_input("憑證密碼", type="a790914")
+  ca_pwd = st.text_input("憑證密碼", type="password")
   symbol = st.text_input("訂閱商品代碼", value="TXFL6")
 
   connect_btn = st.button("🚀 啟動行情連線", use_container_width=True)

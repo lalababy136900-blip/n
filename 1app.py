@@ -32,23 +32,16 @@ with detail_container:
 
 st.markdown("---")
 
-# --- 2. 下方：五檔報價與總量統計（採用傳統看盤條列設計） ---
+# --- 2. 五檔報價與下方總掛單區塊 ---
 st.subheader("📊 委買委賣五檔")
 
-# 總量統計列
-col_stat1, col_stat2 = st.columns(2)
-with col_stat1:
-  st.metric(label="總委買張數", value="2,772", delta="+120")
-with col_stat2:
-  st.metric(label="總委賣張數", value="331", delta="-45")
+# 左右並排：左邊賣價五檔，右邊買價五檔
+col_ask_box, col_bid_box = st.columns(2)
 
-# 使用 HTML 打造無格子的精簡五檔條列（仿三竹風）
-col_bid_box, col_ask_box = st.columns(2)
-
-with col_bid_box:
+with col_ask_box:
   st.markdown(
       """
-    <div style="background-color: #1e1e1e; padding: 10px; border-radius: 6px; font-family: monospace;">
+    <div style="background-color: #1e1e1e; padding: 12px; border-radius: 6px; font-family: monospace;">
         <div style="color: #ff4b4b; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 4px;">🔴 賣價五檔 (委賣)</div>
         <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23454</span> <span>27張</span></div>
         <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #ff4b4b;"><span>23453</span> <span>42張</span></div>
@@ -60,10 +53,10 @@ with col_bid_box:
       unsafe_allow_html=True,
   )
 
-with col_ask_box:
+with col_bid_box:
   st.markdown(
       """
-    <div style="background-color: #1e1e1e; padding: 10px; border-radius: 6px; font-family: monospace;">
+    <div style="background-color: #1e1e1e; padding: 12px; border-radius: 6px; font-family: monospace;">
         <div style="color: #00cc66; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 4px;">🟢 買價五檔 (委買)</div>
         <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23448</span> <span>5張</span></div>
         <div style="display: flex; justify-content: space-between; padding: 4px 0; color: #00cc66;"><span>23447</span> <span>53張</span></div>
@@ -74,3 +67,13 @@ with col_ask_box:
     """,
       unsafe_allow_html=True,
   )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 下方顯示總委買 / 總委賣總掛單數據
+st.markdown("##### 📌 總掛單統計")
+col_stat1, col_stat2 = st.columns(2)
+with col_stat1:
+  st.metric(label="總委買張數", value="2,772", delta="+120")
+with col_stat2:
+  st.metric(label="總委賣張數", value="331", delta="-45")

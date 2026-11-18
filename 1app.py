@@ -17,7 +17,7 @@ with st.sidebar:
   ca_file = st.text_input(
       "憑證檔名 (需放在同資料夾)", placeholder="例如: my_cert.pfx"
   )
-  ca_pwd = st.text_input("憑證密碼", type="password")
+  ca_pwd = st.text_input("憑證密碼", type="a790914")
   symbol = st.text_input("訂閱商品代碼", value="TXFL6")
 
   connect_btn = st.button("🚀 啟動行情連線", use_container_width=True)

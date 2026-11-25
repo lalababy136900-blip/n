@@ -6,8 +6,8 @@ from datetime import datetime
 from collections import deque
 
 # ================= 1. 填寫你的永豐金 API 金鑰 =================
-API_KEY = "6EvJDWTeHPLsYpsLNggmnoKjYcpe7CxYG7nCEJtZczJ3"
-SECRET_KEY = "8FQx6Mhzjpq4Es3amhwsrzvKyDxeayp1rmavVJeV2uQ2"
+API_KEY = "HUDANwVT6SMJv8yUjTPY9eMGv1o1ChauVExuzfvn1Y8A"
+SECRET_KEY = "CGwca8CUYuLrpp6dvcf2vzMoyEqG1BkfHd7LkLXM5ZSb"
 # ==========================================================
 
 st.set_page_config(page_title="微台指 永豐API即時監控", layout="wide")

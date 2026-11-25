@@ -15,7 +15,7 @@ st.set_page_config(page_title="台指期 永豐API即時監控", layout="wide")
 # 初始化 Shioaji 連線 (快取連線避免每次重整都重新登入)
 @st.cache_resource
 def init_shioaji():
-    api = sj.Shioaji()
+    api = sj.Shioaji(simulation=True)
     api.login(api_key=API_KEY, secret_key=SECRET_KEY)
     
     # 用於儲存即時收到的 Tick 數據

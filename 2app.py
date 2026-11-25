@@ -20,11 +20,10 @@ def init_shioaji():
     
     # 用於儲存即時收到的 Tick 數據
     tick_buffer = deque(maxlen=50)
-    
+
     # 註冊期貨即時 Tick 回呼函式
     @api.on_tick_fop_v1
     def quote_callback(exchange, tick):
-        # tick_type: 1=外盤(買), 2=內盤(賣), 0=無法判定
         side = "外盤(買)" if tick.tick_type == 1 else ("內盤(賣)" if tick.tick_type == 2 else "中性")
         tick_buffer.appendleft({
             "時間": tick.datetime.strftime("%H:%M:%S"),
@@ -32,7 +31,7 @@ def init_shioaji():
             "單量": int(tick.volume),
             "內外盤": side
         })
-        
+
     # 訂閱台指期近月合約 (TXFR1 為台指期近月連續合約代碼)
     contract = api.Contracts.Futures.TXF.TXFR1
     api.subscribe(contract, quote_type=sj.constant.QuoteType.Tick)
@@ -55,28 +54,34 @@ except Exception as e:
     st.stop()
 
 # 顯示即時明細區塊
-placeholder = st.empty()
+if len(tick_buffer) == 0:
+    st.warning("⏳ 已連線，正在等待台指期即時成交 Tick 推播中（非開盤時段無新成交）...")
+else:
+    df = pd.DataFrame(list(tick_buffer))
+    latest = df.iloc[0]
 
-# 持續更新畫面
-while True:
-    with placeholder.container():
-        if len(tick_buffer) == 0:
-            st.warning("⏳ 已連線，正在等待台指期即時成交 Tick 推播中（非開盤時段無新成交）...")
-        else:
-            df = pd.DataFrame(list(tick_buffer))
-            latest = df.iloc[0]
-            
-            # 計算目前畫面統計的內外盤差
-            buy_vol = df[df["內外盤"] == "外盤(買)"]["單量"].sum()
-            sell_vol = df[df["內外盤"] == "內盤(賣)"]["單量"].sum()
-            net_diff = buy_vol - sell_vol
-            
-            # 頂部指標卡
-            col1, col2, col3 = st.columns(3)
-            col1.metric("台指期最新成交價", f"{latest['價格']:,.0f}")
-            col2.metric("近期累積盤差 (買-賣)", f"{net_diff:+d} 口")
-            col3.metric("最新一筆成交", f"{latest['單量']} 口 ({latest['內外盤']})")
-            
-            st.subheader(f"⚡ 即時成交明細 (大單門檻: {big_order_threshold}口)")
-            
-            # 逐筆顯示與大單高亮
+    # 計算目前畫面統計的內外盤差
+    buy_vol = df[df["內外盤"] == "外盤(買)"]["單量"].sum()
+    sell_vol = df[df["內外盤"] == "內盤(賣)"]["單量"].sum()
+    net_diff = buy_vol - sell_vol
+
+    # 頂部指標卡
+    col1, col2, col3 = st.columns(3)
+    col1.metric("台指期最新成交價", f"{latest['價格']:,.0f}")
+    col2.metric("近期累積盤差 (買-賣)", f"{net_diff:+d} 口")
+    col3.metric("最新一筆成交", f"{latest['單量']} 口 ({latest['內外盤']})")
+
+    st.subheader(f"⚡ 即時成交明細 (大單門檻: {big_order_threshold}口)")
+
+    # 顯示表格（若有用到容器寬度，改用 width="stretch" 避免過期警告）
+    def highlight_big_order(row):
+        return ['background-color: rgba(255, 75, 75, 0.2)' if row['單量'] >= big_order_threshold else '' for _ in row]
+
+    st.dataframe(
+        df.style.apply(highlight_big_order, axis=1),
+        width="stretch"
+    )
+
+# 自動重新整理畫面（每秒檢查一次是否有新 Tick 進來）
+time.sleep(1)
+st.rerun()

@@ -10,7 +10,7 @@ API_KEY = "6EvJDWTeHPLsYpsLNggmnoKjYcpe7CxYG7nCEJtZczJ3"
 SECRET_KEY = "8FQx6Mhzjpq4Es3amhwsrzvKyDxeayp1rmavVJeV2uQ2"
 # ==========================================================
 
-st.set_page_config(page_title="台指期 永豐API即時監控", layout="wide")
+st.set_page_config(page_title="微台指 永豐API即時監控", layout="wide")
 
 # 初始化 Shioaji 連線 (快取連線避免每次重整都重新登入)
 @st.cache_resource
@@ -32,8 +32,8 @@ def init_shioaji():
             "內外盤": side
         })
 
-    # 訂閱台指期近月合約 (TXFR1 為台指期近月連續合約代碼)
-    contract = api.Contracts.Futures.TXF.TXFR1
+    # 訂閱微台指近月合約 (TMFR1 為微台指近月連續合約代碼)
+    contract = api.Contracts.Futures.TMF.TMFR1
     api.subscribe(contract, quote_type=sj.constant.QuoteType.Tick)
     
     return api, tick_buffer
@@ -43,19 +43,19 @@ st.sidebar.header("⚙️ 警示設定")
 big_order_threshold = st.sidebar.number_input("大單警示門檻 (口數)", min_value=1, max_value=500, value=30, step=5)
 st.sidebar.info(f"💡 單筆成交達 **{big_order_threshold} 口** 以上將觸發大單標記！")
 
-st.title("🚨 台指期 永豐API即時盤差與大單監控")
+st.title("🚨 微台指 (TMF) 永豐API即時盤差與大單監控")
 
 # 嘗試連線
 try:
     api, tick_buffer = init_shioaji()
-    st.sidebar.success("✅ 永豐 Shioaji API 連線成功")
+    st.sidebar.success("✅ 永豐 Shioaji API 連線成功 (微台指 TMFR1)")
 except Exception as e:
-    st.error(f"❌ API 連線失敗，請檢查金鑰是否正確或 IP 權限是否設為無限制：{e}")
+    st.error(f"❌ API 連線失敗，請檢查金鑰或合約代碼：{e}")
     st.stop()
 
 # 顯示即時明細區塊
 if len(tick_buffer) == 0:
-    st.warning("⏳ 已連線，正在等待台指期即時成交 Tick 推播中（非開盤時段無新成交）...")
+    st.warning("⏳ 已連線，正在等待微台指即時成交 Tick 推播中（非開盤時段無新成交）...")
 else:
     df = pd.DataFrame(list(tick_buffer))
     latest = df.iloc[0]
@@ -67,13 +67,12 @@ else:
 
     # 頂部指標卡
     col1, col2, col3 = st.columns(3)
-    col1.metric("台指期最新成交價", f"{latest['價格']:,.0f}")
+    col1.metric("微台指最新成交價", f"{latest['價格']:,.0f}")
     col2.metric("近期累積盤差 (買-賣)", f"{net_diff:+d} 口")
     col3.metric("最新一筆成交", f"{latest['單量']} 口 ({latest['內外盤']})")
 
     st.subheader(f"⚡ 即時成交明細 (大單門檻: {big_order_threshold}口)")
 
-    # 顯示表格（若有用到容器寬度，改用 width="stretch" 避免過期警告）
     def highlight_big_order(row):
         return ['background-color: rgba(255, 75, 75, 0.2)' if row['單量'] >= big_order_threshold else '' for _ in row]
 

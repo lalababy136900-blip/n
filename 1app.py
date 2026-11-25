@@ -3,7 +3,7 @@ import time
 import pandas as pd
 import streamlit as st
 
-# 設定網頁寬版排版，更貼近手機App或電腦看盤畫面
+# 🚨 必須放在所有 Streamlit 指令的最上方！
 st.set_page_config(
     page_title="台指期 專業三竹風看盤介面",
     page_icon="📈",

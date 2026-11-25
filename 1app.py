@@ -105,7 +105,7 @@ for _ in range(300):
         side_name = "紅燈(買)" if is_red else "綠燈(賣)"
         st.toast(f"🚨【大單警示】成交 {tick_vol} 張 ({side_name})！", icon="⚡")
 
-    # 記錄成交明細（已修復：補齊完整字典與 insert 呼叫）
+    # 記錄成交明細（完整保留）
     st.session_state.trade_log.insert(
         0,
         {
